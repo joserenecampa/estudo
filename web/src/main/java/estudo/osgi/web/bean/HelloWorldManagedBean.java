@@ -1,16 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package estudo.osgi.web.bean;
 
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 
-/**
- *
- * @author 09275643784
- */
 @ManagedBean
+@RequestScoped
 public class HelloWorldManagedBean {
     
     private String message = "Hello World JSF 2.0";
