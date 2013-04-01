@@ -12,7 +12,20 @@
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>*.jsf</url-pattern>
-    </servlet-mapping>    
+    </servlet-mapping>
+    <context-param>
+        <param-name>upload-dir</param-name>
+        <param-value>/opt/upload/</param-value>
+    </context-param>    
+    <filter>
+        <filter-name>PrimeFaces FileUpload Filter</filter-name>
+        <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>PrimeFaces FileUpload Filter</filter-name>
+        <servlet-name>Faces Servlet</servlet-name>
+    </filter-mapping>    
+    
     <session-config>
         <session-timeout>
             30
