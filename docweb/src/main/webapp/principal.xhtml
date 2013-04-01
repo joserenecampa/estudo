@@ -3,17 +3,17 @@
 <ui:composition xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
                 template="./template.xhtml">
 
     <ui:define name="top">
-        <h:form enctype="multipart/form-data">  
+        <h:form id="formUpload" enctype="multipart/form-data">  
             <p:fileUpload fileUploadListener="#{fileUploadController.handleFileUpload}"  
                           mode="advanced"
                           update="messages"
                           multiple="true"
                           sizeLimit="100000000"
-                          allowTypes="/(\.|\/)(gif|jpe?g|png|pdf|txt|doc|odt|xls)$/"/>  
-
+                          allowTypes="/(\.|\/)(gif|jpe?g|png|pdf|txt|doc|odt|xls)$/" />  
             <p:growl id="messages" showDetail="true"/>  
         </h:form>
     </ui:define>
@@ -27,7 +27,35 @@
     </ui:define>
 
     <ui:define name="content">
-        content
+        <h:form id="formFiles">  
+            <p:treeTable value="#{fileController.root}" var="file" id="multiSelect"
+                         selection="#{fileController.selectedNodes}" selectionMode="checkbox">  
+                <f:facet name="header"></f:facet>  
+                <p:column>  
+                    <f:facet name="header">  
+                        Name
+                    </f:facet>  
+                    <h:outputText value="#{file.name}" />  
+                </p:column>  
+                <p:column>  
+                    <f:facet name="header">  
+                        Size  
+                    </f:facet>  
+                    <h:outputText value="#{file.size}" />  
+                </p:column>  
+                <p:column>  
+                    <f:facet name="header">  
+                        Signed
+                    </f:facet>  
+                    <h:outputText value="#{file.signed}" />
+                </p:column>  
+                <f:facet name="footer">  
+                    <p:commandButton value="View" icon="ui-icon-search" />
+                    <p:commandButton value="Signer" />
+                    <p:commandButton value="Refresh" action="#{fileController.fillNodes}" />
+                </f:facet>  
+            </p:treeTable>  
+        </h:form>  
     </ui:define>
 
     <ui:define name="bottom">
