@@ -5,8 +5,8 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets">
     <h:form>
-        <c:forEach id="menu" items="${menuBean.menus}" var="menu">
-            <h:commandButton value="${menu.description}" label="${menu.description}" action="${menu.action}" /><br/>
+        <c:forEach id="menu" items="#{menuBean.menus}" var="menu">
+            <h:commandButton value="#{menu.description}" action="#{menu.doAction}" /><br/>
         </c:forEach>
     </h:form>
 </ui:composition>

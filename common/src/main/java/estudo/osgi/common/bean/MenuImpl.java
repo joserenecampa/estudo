@@ -66,7 +66,8 @@ public class MenuImpl implements Menu {
     }
     
     @Override
-    public String action() {
+    public String doAction() {
+        System.out.println("Executando o médoto doAction: " + this.action);
         return this.action;
     }
     
