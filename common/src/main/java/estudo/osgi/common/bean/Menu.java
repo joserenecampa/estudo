@@ -24,6 +24,6 @@ public interface Menu {
 
     public void setParent(Menu parent);
     
-    public String action();
+    public String doAction();
     
 }
