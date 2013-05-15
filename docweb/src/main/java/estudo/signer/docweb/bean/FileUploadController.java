@@ -7,6 +7,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import org.primefaces.event.FileUploadEvent;
 
 @ManagedBean
@@ -53,6 +54,5 @@ public class FileUploadController {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Erro ao fechar o arquivo escrito no diretório de destino"));
             throw new RuntimeException("Erro ao fechar o arquivo escrito no diretório de destino");
         }
-        
     }
 }

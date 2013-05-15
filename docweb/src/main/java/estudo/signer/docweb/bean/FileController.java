@@ -1,5 +1,6 @@
 package estudo.signer.docweb.bean;
 
+import java.io.IOException;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
@@ -37,9 +38,7 @@ public class FileController {
     @PostConstruct
     public void fillNodes() {
         root = new DefaultTreeNode("root", null);
-        String uploadDir = FacesContext.getCurrentInstance().getExternalContext().getInitParameter("upload-dir");
-        if (uploadDir == null || uploadDir.trim().length() <= 0)
-            uploadDir = "/tmp/upload";
+        String uploadDir = this.getUploadDir();
         java.io.File path = new java.io.File(uploadDir);
         if (!path.exists()) {
             new DefaultTreeNode(new File("There is not file on directory", 0l, false), root);
@@ -51,6 +50,33 @@ public class FileController {
                 new DefaultTreeNode(new File(file.getName(), file.length(), this.isSigned(file)), root);
             }
         }
+    }
+    
+    private String getUploadDir() {
+        String result = FacesContext.getCurrentInstance().getExternalContext().getInitParameter("upload-dir");
+        if (result == null || result.trim().length() <= 0)
+            result = "/tmp/upload/";
+        return result;
+    }
+    
+    public void removeFiles() {
+        if (this.selectedNodes == null || this.selectedNodes.length <= 0) {
+            System.out.println("Não há arquivos a serem apagados");
+            return;
+        }
+        for (TreeNode treeNode : this.selectedNodes) {
+            if (treeNode.isLeaf()) {
+                File file = (File)treeNode.getData();
+                String filePath = this.getUploadDir() + file.getName();
+                try {
+                    java.io.File fileToRemove = new java.io.File(filePath);
+                    fileToRemove.delete();
+                } catch (Throwable error) {
+                    System.out.println("Erro ao tentar apagar o arquivo [" + filePath + "]");
+                }
+            }
+        }
+        this.fillNodes();
     }
     
     private boolean isSigned(java.io.File file) {
