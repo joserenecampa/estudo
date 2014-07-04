@@ -1,4 +1,4 @@
-package br.gov.serpro.info.impl;
+package br.gov.serpro.util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;

@@ -1,17 +1,11 @@
 package br.gov.serpro.asn1.icpb;
 
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.esf.OtherHashAlgAndValue;
 import org.bouncycastle.asn1.x500.DirectoryString;
 
 import br.gov.serpro.asn1.ASN1Object;
-import br.gov.serpro.asn1.GeneralizedTime;
-import br.gov.serpro.asn1.etsi.ObjectIdentifier;
 import br.gov.serpro.asn1.etsi.SigningPeriod;
 
 public class PolicyInfo extends ASN1Object {
