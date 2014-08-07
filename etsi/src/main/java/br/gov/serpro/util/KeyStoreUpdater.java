@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -43,6 +44,7 @@ public class KeyStoreUpdater {
     public static final String TYPE = "JKS";
     private static final int BYTE_BUFFER = 512;
     private static final KeyStoreUpdater instance = new KeyStoreUpdater();
+    private static final LinkedHashMap<String, X509Certificate> ACS = new LinkedHashMap<String, X509Certificate>();
 
     private KeyStoreUpdater() {
     }
@@ -468,6 +470,19 @@ public class KeyStoreUpdater {
         }
         return result;
     }
+    
+    public Collection<String> updateACS() {
+        Collection<String> result = new ArrayList<String>();
+        Map<String, X509Certificate> map = KeyStoreUpdater.getInstance().getACsFromICPURL(false);
+        Set<String> chaves = map.keySet();
+        for (String chave : chaves) {
+            if (!KeyStoreUpdater.ACS.containsKey(chave)) {
+                result.add(chave);
+                KeyStoreUpdater.ACS.put(chave, map.get(chave));
+            }
+        }
+        return result;
+    }
 
     public void setICPURL(String text) {
         KeyStoreUpdater.STRING_URL = text;
@@ -477,4 +492,13 @@ public class KeyStoreUpdater {
         return KeyStoreUpdater.STRING_URL;
     }
     
+    public static void main(String[] args) {
+        
+        Collection<String> news = KeyStoreUpdater.getInstance().updateACS();
+        System.out.println("Total de novas ACs: " + news.size());
+        KeyStoreUpdater.ACS.remove("AC_CAIXA-JUSv1.crt");
+        news = KeyStoreUpdater.getInstance().updateACS();
+        System.out.println("Total de novas ACs: " + news.size());
+    }
+
 }
