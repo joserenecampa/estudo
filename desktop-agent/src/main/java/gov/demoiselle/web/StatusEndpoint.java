@@ -9,7 +9,7 @@ public class StatusEndpoint {
 
 	@GET
 	public Response status() {
-		return Response.status(Response.Status.OK).entity("OK").build();
+		return Response.ok("OK").build();
 	}
 
 }
