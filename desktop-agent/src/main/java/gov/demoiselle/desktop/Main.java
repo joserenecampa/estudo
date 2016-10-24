@@ -1,22 +1,24 @@
 package gov.demoiselle.desktop;
 
 import javax.servlet.ServletException;
+import javax.swing.JOptionPane;
 
-import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
-
-import gov.demoiselle.web.WebApplication;
-import io.undertow.Undertow;
+import gov.demoiselle.web.WSServer;
 
 public class Main {
-
-	private static final String HOST = "127.0.0.1";
-	private static final int PORT = 9090;
-
-	public static void main(String[] args) throws ServletException {
-		UndertowJaxrsServer ut = new UndertowJaxrsServer();
-		WebApplication ta = new WebApplication();
-		ut.deploy(ta);
-		ut.start(Undertow.builder().addHttpListener(PORT, HOST));
+	
+	public static void envValidate() {
+		String version = System.getProperty("java.version");
+		if (version == null || !version.startsWith("1.8")) {
+			JOptionPane.showMessageDialog(null, "Java deve ser 8 ou superior", "Desktop Agent", 0, null);
+			System.exit(0);
+		} 
+		JOptionPane.showMessageDialog(null, "Desktop Agent OK!", "Desktop Agent", 1, null);
 	}
 
+	public static void main(String[] args) throws ServletException {
+		Main.envValidate();
+		new TrayIcon();
+		new WSServer();
+	}
 }
