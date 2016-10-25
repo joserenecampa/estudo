@@ -1,6 +1,6 @@
-package gov.demoiselle.desktop.command.json;
+package gov.demoiselle.desktop.command.signer;
 
-public class EncriptRequestJson {
+public class SignerRequestJson {
 	
 	/*
 	 * raw
@@ -14,7 +14,6 @@ public class EncriptRequestJson {
 	 */
 	private String format = "text";
 	private Boolean compacted = false;
-	private String algorithm = "RSA";
 	private String alias;
 	private String password;
 	private String provider;
@@ -44,12 +43,6 @@ public class EncriptRequestJson {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public String getAlgorithm() {
-		return algorithm;
-	}
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
-	}
 	public String getAlias() {
 		return alias;
 	}
@@ -68,5 +61,5 @@ public class EncriptRequestJson {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
 }

@@ -1,4 +1,4 @@
-package gov.demoiselle.desktop.command;
+package gov.demoiselle.desktop.command.signer;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -6,7 +6,6 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 
-import javax.crypto.Cipher;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
@@ -17,16 +16,19 @@ import com.sun.security.auth.callback.DialogCallbackHandler;
 
 import br.gov.frameworkdemoiselle.certificate.keystore.loader.KeyStoreLoader;
 import br.gov.frameworkdemoiselle.certificate.keystore.loader.factory.KeyStoreLoaderFactory;
+import br.gov.frameworkdemoiselle.certificate.signer.factory.PKCS7Factory;
+import br.gov.frameworkdemoiselle.certificate.signer.pkcs7.PKCS7Signer;
+import br.gov.frameworkdemoiselle.certificate.signer.pkcs7.bc.policies.ADRBCMS_2_1;
+import gov.demoiselle.desktop.command.ParameterCommand;
 import gov.demoiselle.desktop.command.json.CertificateJson;
-import gov.demoiselle.desktop.command.json.EncriptJson;
-import gov.demoiselle.desktop.command.json.EncriptRequestJson;
-import gov.demoiselle.desktop.command.json.EncriptResponseJson;
 import gov.demoiselle.web.ExecuteCommand;
 
-public class Encript extends ParameterCommand<EncriptJson> {
+public class Signer extends ParameterCommand<SignerJson>{
 
-	public String doCommand(EncriptJson dataCommandJson) {
-		final EncriptRequestJson data = dataCommandJson.getParam();
+	@Override
+	public String doCommand(SignerJson signerRequest) {
+		this.validateRequest(signerRequest);
+		final SignerRequestJson data = signerRequest.getParam();
 		KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
 		if (data.getPassword() == null || data.getPassword().isEmpty())
 			loader.setCallbackHandler(new DialogCallbackHandler());
@@ -41,13 +43,16 @@ public class Encript extends ParameterCommand<EncriptJson> {
 		KeyStore keyStore = loader.getKeyStore();
 		try {
 			X509Certificate cert = (X509Certificate)keyStore.getCertificate(data.getAlias());
-	        final Cipher cipherEnc = Cipher.getInstance(data.getAlgorithm());
 	        PrivateKey privateKey = (PrivateKey) keyStore.getKey(data.getAlias(), null);        
-	        cipherEnc.init(Cipher.ENCRYPT_MODE, privateKey);
-	        byte[] cript = cipherEnc.doFinal(this.getBytes(data));
-	        String encripted = Base64.getEncoder().encodeToString(cript);
-	        EncriptResponseJson result = new EncriptResponseJson();
-	        result.setEncripted(encripted);
+			PKCS7Signer signer = PKCS7Factory.getInstance().factoryDefault();
+	        signer.setCertificates(keyStore.getCertificateChain(data.getAlias()));
+	        signer.setPrivateKey(privateKey);
+	        signer.setSignaturePolicy(new ADRBCMS_2_1());
+	        signer.setAttached(false);
+	        byte[] signed = signer.signer(this.getContent(signerRequest.getParam()));
+	        String encripted = Base64.getEncoder().encodeToString(signed);
+	        SignerResponseJson result = new SignerResponseJson();
+	        result.setSigned(encripted);
 	        CertificateJson by = new CertificateJson();
 	        by.setAlias(data.getAlias());
 	        by.setProvider(keyStore.getProvider().getName());
@@ -59,19 +64,38 @@ public class Encript extends ParameterCommand<EncriptJson> {
 			Gson gson = new Gson();
 			return gson.toJson(result);
 		} catch (Throwable error) {
-			throw new RuntimeException("generic encript error", error);
+			throw new RuntimeException("generic encript error. " + error.getMessage(), error);
 		}
 	}
-	
-	private byte[] getBytes(EncriptRequestJson data) {
-		return data.getContent().getBytes();
+
+	private void validateRequest(SignerJson signerRequest) {
 	}
 
+	private byte[] getContent(SignerRequestJson request) {
+		byte[] result = null;
+		if (request.getFormat().equalsIgnoreCase("text")) {
+			result = request.getContent().getBytes();
+		} else if (request.getFormat().equalsIgnoreCase("base64")) {
+			result = Base64.getDecoder().decode(request.getContent().getBytes());
+		} else if (request.getFormat().equalsIgnoreCase("hexa")) {
+		    int len = request.getContent().length();
+		    byte[] data = new byte[len / 2];
+		    for (int i = 0; i < len; i += 2) {
+		        data[i / 2] = (byte) ((Character.digit(request.getContent().charAt(i), 16) << 4)
+		                             + Character.digit(request.getContent().charAt(i+1), 16));
+		    }
+		    result = data;
+		}
+		if (request.getCompacted()) {
+			// TODO: Descompactar
+		}
+		return result;
+	}
+	
 	public static void main(String[] args) {
-		EncriptJson j = new EncriptJson();
-		j.setCommand("encript");
-		EncriptRequestJson param = new EncriptRequestJson();
-		param.setAlgorithm("RSA");
+		SignerJson j = new SignerJson();
+		j.setCommand("signer");
+		SignerRequestJson param = new SignerRequestJson();
 		param.setAlias("(1288991) JOSE RENE NERY CAILLERET CAMPANARIO");
 		param.setCompacted(false);
 		param.setFormat("text");
@@ -87,5 +111,5 @@ public class Encript extends ParameterCommand<EncriptJson> {
 		System.out.println(result);
 		
 	}
-	
+
 }

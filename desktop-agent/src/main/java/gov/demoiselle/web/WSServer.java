@@ -13,34 +13,55 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 
 public class WSServer extends AbstractReceiveListener {
 
-	private static final String HOST_WS_SERVER = "127.0.0.1";
+	private static final String HOST_WS_SERVER = "localhost";
 	private static final int PORT_WS_SERVER = 9091;
-	public static Undertow UNDERTOWN = null;
+//	private static final int PORT_WS_SSL_SERVER = 9092;
+	public static Undertow UNDERTOWN_HTTP = null;
+//	public static Undertow UNDERTOWN_SSL = null;
 
 	public WSServer() {
 		this.initializeWSServer(HOST_WS_SERVER, PORT_WS_SERVER);
+//		this.initializeWSSSLServer(HOST_WS_SERVER, PORT_WS_SSL_SERVER);
+		WSServer.start();
 	}
 
 	public void initializeWSServer(String host, int port) {
 		final WSServer listener = this;
-		WSServer.UNDERTOWN = Undertow.builder().addHttpListener(port, host)
+		WSServer.UNDERTOWN_HTTP = Undertow.builder().addHttpListener(port, host)
 				.setHandler(path().addPrefixPath("/", websocket(new WebSocketConnectionCallback() {
 					public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
 						channel.getReceiveSetter().set(listener);
 						channel.resumeReceives();
 					}
 				}))).build();
-		WSServer.start();
 	}
-	
+
+//	public void initializeWSSSLServer(String host, int port) {
+//		try {
+//			SSLUtil sslUtil = new SSLUtil();
+//			final WSServer listener = this;
+//			WSServer.UNDERTOWN_SSL = Undertow.builder().addHttpsListener(port, host, sslUtil.createSslContext())
+//					.setHandler(path().addPrefixPath("/", websocket(new WebSocketConnectionCallback() {
+//						public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
+//							channel.getReceiveSetter().set(listener);
+//							channel.resumeReceives();
+//						}
+//					}))).build();
+//		} catch (Throwable error) {
+//			error.printStackTrace();
+//		}
+//	}
+
 	public static void start() {
-		WSServer.UNDERTOWN.start();
+		WSServer.UNDERTOWN_HTTP.start();
+//		WSServer.UNDERTOWN_SSL.start();
 	}
-	
+
 	public static void stop() {
-		WSServer.UNDERTOWN.stop();
+		WSServer.UNDERTOWN_HTTP.stop();
+//		WSServer.UNDERTOWN_SSL.stop();
 	}
-	
+
 	protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
 		final String messageData = message.getData();
 		String result = null;
@@ -62,5 +83,9 @@ public class WSServer extends AbstractReceiveListener {
 			} catch (Throwable error) {
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		new WSServer();
 	}
 }
