@@ -1,0 +1,12 @@
+{
+    "certificates": [
+        {
+            "alias": "(1288991) JOSE RENE NERY CAILLERET CAMPANARIO",
+            "provider": "SunPKCS11-TokenOuSmartCard_30",
+            "subject": "CN\u003dJOSE RENE NERY CAILLERET CAMPANARIO, OU\u003dAutoridade Certificadora SERPROACF, OU\u003dARSERPRO, OU\u003dPessoa Fisica A3, O\u003dICP-Brasil, C\u003dBR",
+            "notBefore": "14 Oct 2016 12:55:11 GMT",
+            "notAfter": "14 Oct 2019 12:55:11 GMT"
+        }
+    ],
+    "command": "listcerts"
+}
