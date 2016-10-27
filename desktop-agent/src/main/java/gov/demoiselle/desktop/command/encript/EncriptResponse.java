@@ -1,9 +1,12 @@
-package gov.demoiselle.desktop.command.json;
+package gov.demoiselle.desktop.command.encript;
 
-public class EncriptResponseJson {
+import gov.demoiselle.desktop.command.cert.Certificate;
+import gov.demoiselle.web.Response;
+
+public class EncriptResponse extends Response {
 	
 	private String encripted;
-	private CertificateJson by;
+	private Certificate by;
 	private String publicKey;
 	
 	public String getEncripted() {
@@ -12,10 +15,10 @@ public class EncriptResponseJson {
 	public void setEncripted(String encripted) {
 		this.encripted = encripted;
 	}
-	public CertificateJson getBy() {
+	public Certificate getBy() {
 		return by;
 	}
-	public void setBy(CertificateJson by) {
+	public void setBy(Certificate by) {
 		this.by = by;
 	}
 	public String getPublicKey() {

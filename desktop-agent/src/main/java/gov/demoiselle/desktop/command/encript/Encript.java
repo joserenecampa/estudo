@@ -1,4 +1,4 @@
-package gov.demoiselle.desktop.command;
+package gov.demoiselle.desktop.command.encript;
 
 import java.io.IOException;
 import java.security.KeyStore;
@@ -12,21 +12,17 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import com.google.gson.Gson;
 import com.sun.security.auth.callback.DialogCallbackHandler;
 
 import br.gov.frameworkdemoiselle.certificate.keystore.loader.KeyStoreLoader;
 import br.gov.frameworkdemoiselle.certificate.keystore.loader.factory.KeyStoreLoaderFactory;
-import gov.demoiselle.desktop.command.json.CertificateJson;
-import gov.demoiselle.desktop.command.json.EncriptJson;
-import gov.demoiselle.desktop.command.json.EncriptRequestJson;
-import gov.demoiselle.desktop.command.json.EncriptResponseJson;
-import gov.demoiselle.web.ExecuteCommand;
+import gov.demoiselle.desktop.command.AbstractCommand;
+import gov.demoiselle.desktop.command.cert.Certificate;
+import gov.demoiselle.web.Execute;
 
-public class Encript extends ParameterCommand<EncriptJson> {
+public class Encript extends AbstractCommand<EncriptRequest, EncriptResponse> {
 
-	public String doCommand(EncriptJson dataCommandJson) {
-		final EncriptRequestJson data = dataCommandJson.getParam();
+	public EncriptResponse doCommand(final EncriptRequest data) {
 		KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
 		if (data.getPassword() == null || data.getPassword().isEmpty())
 			loader.setCallbackHandler(new DialogCallbackHandler());
@@ -46,9 +42,10 @@ public class Encript extends ParameterCommand<EncriptJson> {
 	        cipherEnc.init(Cipher.ENCRYPT_MODE, privateKey);
 	        byte[] cript = cipherEnc.doFinal(this.getBytes(data));
 	        String encripted = Base64.getEncoder().encodeToString(cript);
-	        EncriptResponseJson result = new EncriptResponseJson();
+	        EncriptResponse result = new EncriptResponse();
+	        result.setRequestId(data.getId());
 	        result.setEncripted(encripted);
-	        CertificateJson by = new CertificateJson();
+	        Certificate by = new Certificate();
 	        by.setAlias(data.getAlias());
 	        by.setProvider(keyStore.getProvider().getName());
 	        by.setSubject(cert.getSubjectDN().getName());
@@ -56,35 +53,23 @@ public class Encript extends ParameterCommand<EncriptJson> {
 	        by.setNotBefore(cert.getNotBefore().toGMTString());
 			result.setBy(by);
 			result.setPublicKey(Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded()));
-			Gson gson = new Gson();
-			return gson.toJson(result);
+			return result;
 		} catch (Throwable error) {
-			throw new RuntimeException("generic encript error", error);
+			throw new RuntimeException(error.getMessage(), error);
 		}
 	}
 	
-	private byte[] getBytes(EncriptRequestJson data) {
+	private byte[] getBytes(EncriptRequest data) {
 		return data.getContent().getBytes();
 	}
 
 	public static void main(String[] args) {
-		EncriptJson j = new EncriptJson();
-		j.setCommand("encript");
-		EncriptRequestJson param = new EncriptRequestJson();
-		param.setAlgorithm("RSA");
-		param.setAlias("(1288991) JOSE RENE NERY CAILLERET CAMPANARIO");
-		param.setCompacted(false);
-		param.setFormat("text");
-		param.setType("raw");
-		param.setProvider("SunPKCS11-TokenOuSmartCard_30");
-		param.setContent("HELLO WORLD!");
-		j.setParam(param );
-		Gson gson = new Gson();
-		String json = gson.toJson(j);
-		System.out.println(json);
-		ExecuteCommand exec = new ExecuteCommand();
-		String result = exec.executeCommand(json);
-		System.out.println(result);
+		EncriptRequest request = new EncriptRequest();
+		request.setAlias("(1288991) JOSE RENE NERY CAILLERET CAMPANARIO");
+		request.setCompacted(false);
+		request.setProvider("SunPKCS11-TokenOuSmartCard_30");
+		request.setContent("HELLO WORLD!");
+		System.out.println((new Execute()).executeCommand(request));
 		
 	}
 	

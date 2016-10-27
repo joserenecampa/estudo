@@ -3,6 +3,8 @@ package gov.demoiselle.web;
 import static io.undertow.Handlers.path;
 import static io.undertow.Handlers.websocket;
 
+import java.util.UUID;
+
 import io.undertow.Undertow;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.AbstractReceiveListener;
@@ -30,6 +32,9 @@ public class WSServer extends AbstractReceiveListener {
 		WSServer.UNDERTOWN_HTTP = Undertow.builder().addHttpListener(port, host)
 				.setHandler(path().addPrefixPath("/", websocket(new WebSocketConnectionCallback() {
 					public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
+						String uuid = UUID.randomUUID().toString();
+						System.out.println("Criando conexao: " + uuid);
+						channel.setAttribute("uuid", uuid);
 						channel.getReceiveSetter().set(listener);
 						channel.resumeReceives();
 					}
@@ -63,23 +68,28 @@ public class WSServer extends AbstractReceiveListener {
 	}
 
 	protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) {
+		String uuid = (String)channel.getAttribute("uuid");
 		final String messageData = message.getData();
+		System.out.println("recebendo command: " + messageData);
 		String result = null;
 		try {
-			ExecuteCommand execute = new ExecuteCommand();
-			result = execute.executeCommand(messageData);
-		} catch (InterpreterJsonException error) {
-			replyToAll(channel, "{ \"erro\": \"Erro ao tentar interpretar o JSON\"}");
+			result = new Execute().executeCommand(messageData);
+		} catch (InterpreterException error) {
+			replyToUUID(channel, "{ \"erro\": \"Erro ao tentar interpretar o JSON\"}", uuid);
 		} catch (Throwable error) {
-			replyToAll(channel, "{ \"erro\": \"" + error.getMessage() + "\"}");
+			replyToUUID(channel, "{ \"erro\": \"" + error.getMessage() + "\"}", uuid);
 		}
-		replyToAll(channel, result);
+		replyToUUID(channel, result, uuid);
 	}
 
-	protected void replyToAll(WebSocketChannel channel, String messageData) {
+	protected void replyToUUID(WebSocketChannel channel, String messageData, String uuid) {
 		for (WebSocketChannel session : channel.getPeerConnections()) {
+			String sessionUUID = (String)session.getAttribute("uuid");
 			try {
-				WebSockets.sendText(messageData, session, null);
+				if (uuid != null && uuid.equalsIgnoreCase(sessionUUID)) {
+					System.out.println("Enviando resposta do cliente: " + uuid + ". " + messageData);
+					WebSockets.sendText(messageData, session, null);
+				}
 			} catch (Throwable error) {
 			}
 		}

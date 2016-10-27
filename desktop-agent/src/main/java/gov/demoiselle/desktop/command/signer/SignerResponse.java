@@ -1,12 +1,17 @@
 package gov.demoiselle.desktop.command.signer;
 
-import gov.demoiselle.desktop.command.json.CertificateJson;
+import gov.demoiselle.desktop.command.cert.Certificate;
+import gov.demoiselle.web.Response;
 
-public class SignerResponseJson {
+public class SignerResponse extends Response {
 	
 	private String signed;
-	private CertificateJson by;
+	private Certificate by;
 	private String publicKey;
+	
+	public SignerResponse() {
+		super.setCommand("signer");
+	}
 	
 	public String getSigned() {
 		return signed;
@@ -14,10 +19,10 @@ public class SignerResponseJson {
 	public void setSigned(String signed) {
 		this.signed = signed;
 	}
-	public CertificateJson getBy() {
+	public Certificate getBy() {
 		return by;
 	}
-	public void setBy(CertificateJson by) {
+	public void setBy(Certificate by) {
 		this.by = by;
 	}
 	public String getPublicKey() {

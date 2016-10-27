@@ -18,7 +18,7 @@
 	</repositories>
 	<properties>
 		<undertow.version>1.3.0.Final</undertow.version>
-		<certificate.version>1.1.0</certificate.version>
+		<certificate.version>2.0.0</certificate.version>
 	</properties>
 	<dependencies>
 		<dependency>

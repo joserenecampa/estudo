@@ -1,6 +1,8 @@
 package gov.demoiselle.desktop.command.signer;
 
-public class SignerRequestJson {
+import gov.demoiselle.web.Request;
+
+public class SignerRequest extends Request {
 	
 	/*
 	 * raw
@@ -16,9 +18,14 @@ public class SignerRequestJson {
 	private Boolean compacted = false;
 	private String alias;
 	private String password;
+	private String signaturePolicy = "AD_RB_CADES_2_1";
 	private String provider;
 	private String content;
 	
+	public SignerRequest() {
+		super.setCommand("signer");
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -61,5 +68,12 @@ public class SignerRequestJson {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	public String getSignaturePolicy() {
+		return signaturePolicy;
+	}
+	public void setSignaturePolicy(String signaturePolicy) {
+		this.signaturePolicy = signaturePolicy;
+	}
+	
 
 }

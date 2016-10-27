@@ -1,6 +1,6 @@
-package gov.demoiselle.desktop.command.json;
+package gov.demoiselle.desktop.command.cert;
 
-public class CertificateJson {
+public class Certificate {
 	
 	private String alias;
 	private String provider;
@@ -8,6 +8,7 @@ public class CertificateJson {
 	private String notBefore;
 	private String notAfter;
 	private String serial;
+	
 	public String getSubject() {
 		return subject;
 	}

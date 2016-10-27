@@ -4,7 +4,7 @@ import java.util.ServiceLoader;
 
 import gov.demoiselle.desktop.Command;
 
-public class List extends AbstractCommand {
+public class List implements Command {
 
 	public String doCommand(String params) {
 		StringBuilder builder = new StringBuilder();
@@ -14,6 +14,10 @@ public class List extends AbstractCommand {
 			builder.append("\"" + command.getCommandName() + "\", ");
 		builder.append("\"\"]} ");
 		return builder.toString().replaceAll(", \"\"", "");
+	}
+
+	public String getCommandName() {
+		return this.getClass().getSimpleName().toLowerCase();
 	}
 
 }

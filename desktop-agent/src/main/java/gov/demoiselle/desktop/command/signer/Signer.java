@@ -11,67 +11,71 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import com.google.gson.Gson;
 import com.sun.security.auth.callback.DialogCallbackHandler;
 
 import br.gov.frameworkdemoiselle.certificate.keystore.loader.KeyStoreLoader;
 import br.gov.frameworkdemoiselle.certificate.keystore.loader.factory.KeyStoreLoaderFactory;
 import br.gov.frameworkdemoiselle.certificate.signer.factory.PKCS7Factory;
 import br.gov.frameworkdemoiselle.certificate.signer.pkcs7.PKCS7Signer;
-import br.gov.frameworkdemoiselle.certificate.signer.pkcs7.bc.policies.ADRBCMS_2_1;
-import gov.demoiselle.desktop.command.ParameterCommand;
-import gov.demoiselle.desktop.command.json.CertificateJson;
-import gov.demoiselle.web.ExecuteCommand;
+import br.gov.frameworkdemoiselle.policy.engine.factory.PolicyFactory.Policies;
+import gov.demoiselle.desktop.command.AbstractCommand;
+import gov.demoiselle.desktop.command.cert.Certificate;
+import gov.demoiselle.web.Execute;
 
-public class Signer extends ParameterCommand<SignerJson>{
+public class Signer extends AbstractCommand<SignerRequest, SignerResponse>{
 
 	@Override
-	public String doCommand(SignerJson signerRequest) {
-		this.validateRequest(signerRequest);
-		final SignerRequestJson data = signerRequest.getParam();
+	public SignerResponse doCommand(final SignerRequest request) {
+		this.validateRequest(request);
 		KeyStoreLoader loader = KeyStoreLoaderFactory.factoryKeyStoreLoader();
-		if (data.getPassword() == null || data.getPassword().isEmpty())
+		if (request.getPassword() == null || request.getPassword().isEmpty())
 			loader.setCallbackHandler(new DialogCallbackHandler());
 		else
 			loader.setCallbackHandler(new CallbackHandler() {
 				public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 					for (Callback callback : callbacks)
 						if (callback instanceof PasswordCallback)
-							((PasswordCallback)callback).setPassword(data.getPassword().toCharArray());
+							((PasswordCallback)callback).setPassword(request.getPassword().toCharArray());
 				}
 			});
 		KeyStore keyStore = loader.getKeyStore();
 		try {
-			X509Certificate cert = (X509Certificate)keyStore.getCertificate(data.getAlias());
-	        PrivateKey privateKey = (PrivateKey) keyStore.getKey(data.getAlias(), null);        
+			X509Certificate cert = (X509Certificate)keyStore.getCertificate(request.getAlias());
+	        PrivateKey privateKey = (PrivateKey) keyStore.getKey(request.getAlias(), null);        
 			PKCS7Signer signer = PKCS7Factory.getInstance().factoryDefault();
-	        signer.setCertificates(keyStore.getCertificateChain(data.getAlias()));
+	        signer.setCertificates(keyStore.getCertificateChain(request.getAlias()));
 	        signer.setPrivateKey(privateKey);
-	        signer.setSignaturePolicy(new ADRBCMS_2_1());
+	        Policies policie = null;
+	        try {
+	        	policie = Policies.valueOf(request.getSignaturePolicy());
+	        } catch (Throwable error) {
+	        	policie = Policies.AD_RB_CADES_2_1;
+	        }
+	        signer.setSignaturePolicy(policie);
 	        signer.setAttached(false);
-	        byte[] signed = signer.signer(this.getContent(signerRequest.getParam()));
+	        byte[] signed = signer.doSign(this.getContent(request));
 	        String encripted = Base64.getEncoder().encodeToString(signed);
-	        SignerResponseJson result = new SignerResponseJson();
+	        SignerResponse result = new SignerResponse();
+	        result.setRequestId(request.getId());
 	        result.setSigned(encripted);
-	        CertificateJson by = new CertificateJson();
-	        by.setAlias(data.getAlias());
+	        Certificate by = new Certificate();
+	        by.setAlias(request.getAlias());
 	        by.setProvider(keyStore.getProvider().getName());
 	        by.setSubject(cert.getSubjectDN().getName());
 	        by.setNotAfter(cert.getNotAfter().toGMTString());
 	        by.setNotBefore(cert.getNotBefore().toGMTString());
 			result.setBy(by);
 			result.setPublicKey(Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded()));
-			Gson gson = new Gson();
-			return gson.toJson(result);
+			return result;
 		} catch (Throwable error) {
-			throw new RuntimeException("generic encript error. " + error.getMessage(), error);
+			throw new RuntimeException(error.getMessage(), error);
 		}
 	}
 
-	private void validateRequest(SignerJson signerRequest) {
+	private void validateRequest(SignerRequest request) {
 	}
 
-	private byte[] getContent(SignerRequestJson request) {
+	private byte[] getContent(SignerRequest request) {
 		byte[] result = null;
 		if (request.getFormat().equalsIgnoreCase("text")) {
 			result = request.getContent().getBytes();
@@ -87,29 +91,19 @@ public class Signer extends ParameterCommand<SignerJson>{
 		    result = data;
 		}
 		if (request.getCompacted()) {
-			// TODO: Descompactar
 		}
 		return result;
 	}
 	
 	public static void main(String[] args) {
-		SignerJson j = new SignerJson();
-		j.setCommand("signer");
-		SignerRequestJson param = new SignerRequestJson();
-		param.setAlias("(1288991) JOSE RENE NERY CAILLERET CAMPANARIO");
-		param.setCompacted(false);
-		param.setFormat("text");
-		param.setType("raw");
-		param.setProvider("SunPKCS11-TokenOuSmartCard_30");
-		param.setContent("HELLO WORLD!");
-		j.setParam(param );
-		Gson gson = new Gson();
-		String json = gson.toJson(j);
-		System.out.println(json);
-		ExecuteCommand exec = new ExecuteCommand();
-		String result = exec.executeCommand(json);
-		System.out.println(result);
-		
+		SignerRequest request = new SignerRequest();
+		request.setId(1);
+		request.setAlias("(1288991) JOSE RENE NERY CAILLERET CAMPANARIO");
+		request.setCompacted(false);
+		request.setProvider("SunPKCS11-TokenOuSmartCard_30");
+		request.setContent("HELLO WORLD!");
+		System.out.println(request.toJson());
+		System.out.println((new Execute()).executeCommand(request));
 	}
 
 }

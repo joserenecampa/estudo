@@ -1,6 +1,8 @@
-package gov.demoiselle.desktop.command.json;
+package gov.demoiselle.desktop.command.encript;
 
-public class EncriptRequestJson {
+import gov.demoiselle.web.Request;
+
+public class EncriptRequest extends Request {
 	
 	/*
 	 * raw
@@ -19,6 +21,10 @@ public class EncriptRequestJson {
 	private String password;
 	private String provider;
 	private String content;
+	
+	public EncriptRequest() {
+		super.setCommand("encript");
+	}
 	
 	public String getType() {
 		return type;
