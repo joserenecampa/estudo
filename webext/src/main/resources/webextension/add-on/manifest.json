@@ -1,0 +1,26 @@
+{
+	"name": "java_echo_test",
+	"description": "java_echo_test",
+	"version": "1.0",
+	"manifest_version": 2,
+	"icons": {
+		"48": "icons/icone.png"
+	},
+	"applications": {
+		"gecko": {
+			"id": "java_echo_test@example.org",
+			"strict_min_version": "50.0"
+		}
+	},
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"browser_action": {
+		"default_icon": "icons/icone.png"
+	},
+	"permissions": [
+		"nativeMessaging"
+	]
+}
