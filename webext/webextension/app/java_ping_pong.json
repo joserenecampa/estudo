@@ -1,0 +1,7 @@
+{
+  "name": "java_ping_pong",
+  "description": "Java Example host for native messaging",
+  "path": "/home/rene/native-messaging/app/java_ping_pong.sh",
+  "type": "stdio",
+  "allowed_extensions": [ "java_ping_pong@example.org" ]
+}

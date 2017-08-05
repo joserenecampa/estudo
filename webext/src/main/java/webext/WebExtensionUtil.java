@@ -16,19 +16,29 @@ public class WebExtensionUtil {
 	
 	private final static Logger LOGGER = Logger.getLogger(WebExtensionUtil.class.getName());
 	
-	public static final byte[] toNativeBytes(int value) {
+	public static final byte[] toNativeBytes(int oldValue) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
-		try { dos.writeInt(value); } catch (IOException e) { }
+		try { dos.writeInt(oldValue); } catch (IOException e) { }
 		ByteBuffer buffer = ByteBuffer.wrap(baos.toByteArray());
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		return buffer.array();
+		buffer.order(ByteOrder.nativeOrder());
+		int newValue = buffer.getInt();
+		baos = new ByteArrayOutputStream();
+		dos = new DataOutputStream(baos);
+		try { dos.writeInt(newValue); } catch (IOException e) { }		
+		byte[] result = baos.toByteArray();
+		LOGGER.info("toNativeBytes -> Old INT: " + oldValue + ". New INT: " + newValue);
+		return result;
 	}
 	
 	public static final int fromNativeBytes(byte[] value) {
 		ByteBuffer buffer = ByteBuffer.wrap(value);
-		buffer.order(ByteOrder.BIG_ENDIAN);
-		return buffer.getInt();
+		int oldValue = buffer.getInt();
+		buffer = ByteBuffer.wrap(value);
+		buffer.order(ByteOrder.nativeOrder());
+		int newValue = buffer.getInt();
+		LOGGER.info("fromNativeBytes -> Old INT: " + oldValue + ". New INT: " + newValue);
+		return newValue;
 	}
 
 	public static void writeMessage(final String message, final OutputStream os) {
@@ -84,7 +94,7 @@ public class WebExtensionUtil {
 		String result = null;
 		try {
 			result = new String(message, "UTF-8");
-			LOGGER.info("Mensagem em String UTF-8 [" + message + "].");
+			LOGGER.info("Mensagem em String UTF-8 [" + result + "].");
 		} catch (UnsupportedEncodingException error) {
 			LOGGER.info("Erro ao converter a mensagem em String UTF-8", error);
 		}
