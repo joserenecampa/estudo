@@ -1,9 +1,0 @@
-{
-	"name": "java_echo_test",
-	"description": "java_echo_test",
-	"path": "/home/09275643784/dev/workspace/webext/src/main/resources/webextension/app/java_echo_test.sh",
-	"type": "stdio",
-	"allowed_extensions": [
-		"java_echo_test@example.org"
-	]
-}
