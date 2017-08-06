@@ -8,12 +8,18 @@ Listen for messages from the app.
 */
 port.onMessage.addListener((response) => {
   console.log("Received: " + response);
+  alert("Received from Java: " + response);
+});
+
+port.onDisconnect.addListener(() => {
+  console.log("Disconnected");
+  alert("Java Disconnected")
 });
 
 /*
 On a click on the browser action, send the app a message.
 */
 browser.browserAction.onClicked.addListener(() => {
-  console.log("Sending:  ping");
+  console.log("Sending: ping");
   port.postMessage("ping");
 });
