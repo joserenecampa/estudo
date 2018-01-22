@@ -11,6 +11,7 @@ public class Main {
 		String version = System.getProperty("java.version");
 		if (version == null || !version.startsWith("1.8")) {
 			JOptionPane.showMessageDialog(null, "Java deve ser 8 ou superior", "Desktop Agent", 0, null);
+			// TESTE
 			System.exit(0);
 		} 
 		JOptionPane.showMessageDialog(null, "Desktop Agent OK!", "Desktop Agent", 1, null);
